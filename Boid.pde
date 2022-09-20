@@ -38,6 +38,8 @@ class Boid
      if (target != null)
      {  
         // TODO: Implement seek here
+        print(kinematic.getHeading());
+        kinematic.increaseSpeed(2,-.0001);
      }
      
      // place crumbs, do not change     
