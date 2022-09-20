@@ -38,8 +38,23 @@ class Boid
      if (target != null)
      {  
         // TODO: Implement seek here
-        print(kinematic.getHeading());
-        kinematic.increaseSpeed(2,-.0001);
+        //println(kinematic.getHeading());
+        
+        //float targetDirection = atan2(target.y, target.x);
+        float temp1 = atan2(kinematic.getPosition().y-target.y, kinematic.getPosition().x-target.x);
+        float temp2 = kinematic.getHeading();
+        kinematic.increaseSpeed(1,kinematic.getHeading() - temp1);
+        println(temp1 + " " + temp2);
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        kinematic.increaseSpeed(1,-.001);
      }
      
      // place crumbs, do not change     
