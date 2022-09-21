@@ -86,15 +86,27 @@ class Boid
         if (direction.mag() > arrivalThreshold) {
           kinematic.increaseSpeed(1,0);
         } else if (direction.mag() < arrivalThreshold) {
-          if (kinematic.getSpeed() > 0) {
+          //Need more specific code here to handle arrivals correctly
+          
+          if (kinematic.getSpeed() < 40 && direction.mag() > 30) {
+            kinematic.increaseSpeed(1,0);
+          } else if (kinematic.getSpeed() < 20 && direction.mag() > 15) {
+            kinematic.increaseSpeed(.75,0);
+          } else if (kinematic.getSpeed() < 10 && direction.mag() > 5) {
+            kinematic.increaseSpeed(.5,0);
+          } else if (kinematic.getSpeed() < 5 && direction.mag() < 3) {
+            kinematic.increaseSpeed(.25,0);
+          } else {
             kinematic.increaseSpeed(-1,0);
-          } 
+          }
+          
+          
         }
         
         
         
         //drawing a line for testing purposes
-        line(kinematic.position.x, kinematic.position.y, kinematic.position.x + direction.x, kinematic.position.y + direction.y);
+        //line(kinematic.position.x, kinematic.position.y, kinematic.position.x + direction.x, kinematic.position.y + direction.y);
         
         
         
