@@ -53,7 +53,7 @@ class Boid
         float arrivalThreshold = 60.0;
         
         //This just draws a circle for visual debugging purposes
-        //circle(target.x, target.y, arrivalThreshold);
+        circle(target.x, target.y, 3);
         
         //prints the angle to the target
         //println(angleToTarget);
@@ -79,7 +79,7 @@ class Boid
         
         
         
-        //Slight flaw: since the arrival threshold is so big, the boid just won't move if its target is that close. 
+        //Sometimes our Boid just goes and does weird things and I don't know why 
         
         //if the target is outside its arrival threshold, accelerate. 
         //if the target is inside its arrival threshold, accelerate backwards until the speed is 0.
@@ -94,8 +94,9 @@ class Boid
             kinematic.increaseSpeed(.75,0);
           } else if (kinematic.getSpeed() < 10 && direction.mag() > 5) {
             kinematic.increaseSpeed(.5,0);
-          } else if (kinematic.getSpeed() < 5 && direction.mag() < 3) {
-            kinematic.increaseSpeed(.25,0);
+          } else if (kinematic.getSpeed() < 5 && direction.mag() < 5) {
+            kinematic.increaseSpeed(-kinematic.getSpeed(),0);
+            println(kinematic.getSpeed());
           } else {
             kinematic.increaseSpeed(-1,0);
           }
