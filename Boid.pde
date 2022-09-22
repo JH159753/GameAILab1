@@ -95,8 +95,8 @@ class Boid
           } else if (kinematic.getSpeed() < 10 && direction.mag() > 5) {
             kinematic.increaseSpeed(.5,0);
           } else if (kinematic.getSpeed() < 5 && direction.mag() < 5) {
+            //This should ensure that the boid's speed can be dropped to exactly 0 so we don't have stuttering
             kinematic.increaseSpeed(-kinematic.getSpeed(),0);
-            println(kinematic.getSpeed());
           } else {
             kinematic.increaseSpeed(-1,0);
           }
