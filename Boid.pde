@@ -63,6 +63,7 @@ class Boid
         println("positive angle");
         kinematic.increaseSpeed(0.0, 2);
 
+<<<<<<< HEAD
         //if the angle is smaller than the threshold in the negative direction, rotate clockwise
       } else if (angleToTarget < -.1) {
         kinematic.increaseSpeed(0.0, -1);
@@ -74,6 +75,57 @@ class Boid
           kinematic.increaseSpeed(0.0, -1);
         } else if (kinematic.getRotationalVelocity() < 0) {
           kinematic.increaseSpeed(0.0, 1);
+=======
+   void update(float dt)
+   {
+     if (target != null)
+     {  
+        // TODO: Implement seek here
+        
+        
+        //This makes a vector with the direction our boid needs to go to
+        PVector direction = PVector.sub(target, kinematic.position);
+        
+        //atan2(direction.y, direction.x) will return the direction we need to go in radians
+        
+        //print direction we need to go and the direction we are facing right now
+        //println(atan2(direction.y, direction.x) + " " + normalize_angle_left_right(kinematic.getHeading()));
+        
+        float directionalThreshold = .1;
+        //You have to normalize this too or the boid goes the wrong way sometimes
+        float angleToTarget = normalize_angle_left_right(atan2(direction.y, direction.x) - normalize_angle_left_right(kinematic.getHeading()));
+        float arrivalThreshold = 60.0;
+        
+        //This just draws a circle for visual debugging purposes
+        circle(target.x, target.y, 3);
+        
+        //prints the angle to the target
+        println(angleToTarget);
+        
+        //if the angle is larger than the threshold in the positive direction, rotate counterclockwise
+        if (angleToTarget > directionalThreshold && direction.mag() > 30) {
+          kinematic.increaseSpeed(0.0, +1);
+          
+        } else if (angleToTarget > directionalThreshold && direction.mag() > 15) {
+          kinematic.increaseSpeed(0.0, +.5);
+          
+        //if the angle is smaller than the threshold in the negative direction, rotate clockwise
+        } else if (angleToTarget < -directionalThreshold && direction.mag() > 30) {
+          kinematic.increaseSpeed(0.0, -1);
+          
+        } else if (angleToTarget < -directionalThreshold && direction.mag() > 15) {
+          kinematic.increaseSpeed(0.0, -.5);
+          
+        //if the angle is within our threshold, stop our rotational velocity by rotating opposite
+        } else if (directionalThreshold > angleToTarget) {
+          
+          if (kinematic.getRotationalVelocity() > 0) {
+            kinematic.increaseSpeed(0.0, -kinematic.getRotationalVelocity());
+          }
+          else if (kinematic.getRotationalVelocity() < 0) {
+            kinematic.increaseSpeed(0.0, kinematic.getRotationalVelocity()); 
+          }
+>>>>>>> origin/main
         }
       }
 
