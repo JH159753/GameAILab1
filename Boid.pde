@@ -24,6 +24,10 @@ class Boid
    float rotational_acceleration;
    KinematicMovement kinematic;
    PVector target;
+   PVector direction;
+   ArrayList<PVector> waypoints;
+   boolean stillInRadius = true;
+   int currentTarget = 0;
    
    Boid(PVector position, float heading, float max_speed, float max_rotational_speed, float acceleration, float rotational_acceleration)
    {
@@ -39,7 +43,6 @@ class Boid
      {  
         // TODO: Implement seek here
         
-        
         //This makes a vector with the direction our boid needs to go to
         PVector direction = PVector.sub(target, kinematic.position);
         
@@ -49,7 +52,8 @@ class Boid
         //println(atan2(direction.y, direction.x) + " " + normalize_angle_left_right(kinematic.getHeading()));
         
         float directionalThreshold = .1;
-        float angleToTarget = atan2(direction.y, direction.x) - normalize_angle_left_right(kinematic.getHeading());
+        //You have to normalize this too or the boid goes the wrong way sometimes
+        float angleToTarget = normalize_angle_left_right(atan2(direction.y, direction.x) - normalize_angle_left_right(kinematic.getHeading()));
         float arrivalThreshold = 60.0;
         
         //This just draws a circle for visual debugging purposes
@@ -59,29 +63,32 @@ class Boid
         //println(angleToTarget);
         
         //if the angle is larger than the threshold in the positive direction, rotate counterclockwise
-        //Need to rotate slower when the boid is closer to the target
-        
-        if (angleToTarget > directionalThreshold && direction.mag() > arrivalThreshold) {
+        if (angleToTarget > directionalThreshold && direction.mag() > 30) {
           kinematic.increaseSpeed(0.0, +1);
           
+        } else if (angleToTarget > directionalThreshold && direction.mag() > 15) {
+          kinematic.increaseSpeed(0.0, +.5);
+          
         //if the angle is smaller than the threshold in the negative direction, rotate clockwise
-        } else if (angleToTarget < -directionalThreshold && direction.mag() > arrivalThreshold) {
+        } else if (angleToTarget < -directionalThreshold && direction.mag() > 30) {
           kinematic.increaseSpeed(0.0, -1);
+          
+        } else if (angleToTarget < -directionalThreshold && direction.mag() > 15) {
+          kinematic.increaseSpeed(0.0, -.5);
           
         //if the angle is within our threshold, stop our rotational velocity by rotating opposite
         } else if (directionalThreshold > angleToTarget) {
           
           if (kinematic.getRotationalVelocity() > 0) {
-            kinematic.increaseSpeed(0.0, -1);
+            kinematic.increaseSpeed(0.0, -kinematic.getRotationalVelocity());
           }
           else if (kinematic.getRotationalVelocity() < 0) {
-            kinematic.increaseSpeed(0.0, 1); 
+            kinematic.increaseSpeed(0.0, kinematic.getRotationalVelocity()); 
           }
         }
         
         
         
-        //Sometimes our Boid just goes and does weird things and I don't know why 
         
         //if the target is outside its arrival threshold, accelerate. 
         //if the target is inside its arrival threshold, accelerate backwards until the speed is 0.
@@ -111,6 +118,27 @@ class Boid
         //drawing a line for testing purposes
         //line(kinematic.position.x, kinematic.position.y, kinematic.position.x + direction.x, kinematic.position.y + direction.y);
         
+        //handling going to multiple targets
+        
+        //If within 5 units, move to next target
+        if (direction.mag() < 5) {
+          //This ensures that the same target can't trigger moving to the next target twice
+          if (stillInRadius == false) {
+            //this ensures that waypoints get cleared after finishing checking all targets
+            if (currentTarget < waypoints.size() - 1) {
+              currentTarget++;
+            } else {
+              currentTarget = 0;
+              waypoints = null;
+            }
+          }
+          stillInRadius = true;
+          if (waypoints != null) {
+            seek(waypoints.get(currentTarget));
+          }
+        } else {
+          stillInRadius = false; 
+        }
         
         
         
@@ -166,13 +194,22 @@ class Boid
    void seek(PVector target)
    {
       this.target = target;
-      
+      println("seeking");
    }
    
    void follow(ArrayList<PVector> waypoints)
    {
       // TODO: change to follow *all* waypoints
-      this.target = waypoints.get(0);
+      
+      this.waypoints = waypoints;
+      
+      seek(waypoints.get(0));
+      
+      
+      
+      
+      
+      
       
    }
 }
