@@ -94,22 +94,74 @@ class Boid
         //if the target is inside its arrival threshold, accelerate backwards until the speed is 0.
         if (direction.mag() > arrivalThreshold) {
           kinematic.increaseSpeed(1,0);
+          
         } else if (direction.mag() < arrivalThreshold) {
+          
+          
           //Need more specific code here to handle arrivals correctly
+          //TODO: change this to slow down less / not at all if the angle to the next target is not large
           
-          if (kinematic.getSpeed() < 40 && direction.mag() > 30) {
-            kinematic.increaseSpeed(1,0);
-          } else if (kinematic.getSpeed() < 20 && direction.mag() > 15) {
-            kinematic.increaseSpeed(.75,0);
-          } else if (kinematic.getSpeed() < 10 && direction.mag() > 5) {
-            kinematic.increaseSpeed(.5,0);
-          } else if (kinematic.getSpeed() < 5 && direction.mag() < 5) {
-            //This should ensure that the boid's speed can be dropped to exactly 0 so we don't have stuttering
-            kinematic.increaseSpeed(-kinematic.getSpeed(),0);
+          //This handles starting / stopping if there are more targets
+          
+          //This ensures that we don't crash because waypoints is null
+          if (waypoints != null) {
+            
+            //this checks if there's another target to go to
+            if (currentTarget + 1 < waypoints.size()) {
+              
+              //if so, change the speed depending on the angle to the next target
+              //This part isn't really implemented at all, and I need sleep
+              
+              if (kinematic.getSpeed() < 40 && direction.mag() > 30) {
+                kinematic.increaseSpeed(1,0);
+              } else if (kinematic.getSpeed() < 20 && direction.mag() > 15) {
+                kinematic.increaseSpeed(.75,0);
+              } else if (kinematic.getSpeed() < 10 && direction.mag() > 5) {
+                kinematic.increaseSpeed(.5,0);
+              } else if (kinematic.getSpeed() < 5 && direction.mag() < 5) {
+                //This should ensure that the boid's speed can be dropped to exactly 0 so we don't have stuttering
+                kinematic.increaseSpeed(-kinematic.getSpeed(),0);
+              } else {
+                kinematic.increaseSpeed(-1,0);
+              }
+              
+            } else {
+            
+              //if no more targets to check, do the normal calculation
+              if (kinematic.getSpeed() < 40 && direction.mag() > 30) {
+                kinematic.increaseSpeed(1,0);
+              } else if (kinematic.getSpeed() < 20 && direction.mag() > 15) {
+                kinematic.increaseSpeed(.75,0);
+              } else if (kinematic.getSpeed() < 10 && direction.mag() > 5) {
+                kinematic.increaseSpeed(.5,0);
+              } else if (kinematic.getSpeed() < 5 && direction.mag() < 5) {
+                //This should ensure that the boid's speed can be dropped to exactly 0 so we don't have stuttering
+                kinematic.increaseSpeed(-kinematic.getSpeed(),0);
+              } else {
+                kinematic.increaseSpeed(-1,0);
+              }
+            
+            }
+          
           } else {
-            kinematic.increaseSpeed(-1,0);
-          }
           
+            //if waypoints is null, do normal things
+            println("waypoints is null");
+            //This code should trigger if there's only one target left
+            if (kinematic.getSpeed() < 40 && direction.mag() > 30) {
+              kinematic.increaseSpeed(1,0);
+            } else if (kinematic.getSpeed() < 20 && direction.mag() > 15) {
+              kinematic.increaseSpeed(.75,0);
+            } else if (kinematic.getSpeed() < 10 && direction.mag() > 5) {
+              kinematic.increaseSpeed(.5,0);
+            } else if (kinematic.getSpeed() < 5 && direction.mag() < 5) {
+              //This should ensure that the boid's speed can be dropped to exactly 0 so we don't have stuttering
+              kinematic.increaseSpeed(-kinematic.getSpeed(),0);
+            } else {
+              kinematic.increaseSpeed(-1,0);
+            }
+          
+          }
           
         }
         
@@ -120,25 +172,31 @@ class Boid
         
         //handling going to multiple targets
         
-        //If within 5 units, move to next target
-        if (direction.mag() < 5) {
-          //This ensures that the same target can't trigger moving to the next target twice
-          if (stillInRadius == false) {
-            //this ensures that waypoints get cleared after finishing checking all targets
-            if (currentTarget < waypoints.size() - 1) {
-              currentTarget++;
-            } else {
-              currentTarget = 0;
-              waypoints = null;
+        //initial check exists because waypoints will be null for a single target
+        if (waypoints != null) {
+          //If within 5 units, move to next target
+          if (direction.mag() < 5) {
+            //This ensures that the same target can't trigger moving to the next target twice
+            if (stillInRadius == false) {
+              //this ensures that waypoints get cleared after finishing checking all targets
+              if (currentTarget < waypoints.size() - 1) {
+                currentTarget++;
+              } else {
+                currentTarget = 0;
+                waypoints = null;
+              }
             }
+            stillInRadius = true;
+            if (waypoints != null) {
+              seek(waypoints.get(currentTarget));
+            }
+          } else {
+            stillInRadius = false; 
           }
-          stillInRadius = true;
-          if (waypoints != null) {
-            seek(waypoints.get(currentTarget));
-          }
-        } else {
-          stillInRadius = false; 
+          
         }
+        
+        
         
         
         
@@ -194,12 +252,11 @@ class Boid
    void seek(PVector target)
    {
       this.target = target;
-      println("seeking");
+      
    }
    
    void follow(ArrayList<PVector> waypoints)
    {
-      // TODO: change to follow *all* waypoints
       
       this.waypoints = waypoints;
       
