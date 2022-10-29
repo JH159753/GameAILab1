@@ -112,6 +112,36 @@ class Boid
               //if so, change the speed depending on the angle to the next target
               //This part isn't really implemented at all, and I need sleep
               
+              //We can calculate the angle to the next target with the use of two vectors: one from our location to current target, one from current target to next target
+              //use the dot product of those two vectors; this gives us the angle between them, and we can use that to calculate how much we should slow down
+              
+              //direction is our boid to target vector
+              //this is at direction
+              //current target to next target is here:
+              PVector currentTargetToNext = PVector.sub(waypoints.get(currentTarget+1), target);
+              
+              //i'm not sure this is the best way to do this, it might be simpler to calculate the angle, but this should work too
+              
+              //holds dot product of targets
+              float dotProductOfTargets = PVector.dot(currentTargetToNext, direction);
+              
+              //Dividing by both their magnitudes will normalize our result between -1 and 1
+              dotProductOfTargets = dotProductOfTargets / (currentTargetToNext.mag() * direction.mag());
+              
+              //Add 1, divide by 2, this will cause our result to be between 0 and 1
+              //If this is closer to 0, slow down more. If it's closer to 1, slow down less.
+              dotProductOfTargets = (dotProductOfTargets + 1) / 2;
+              
+              //use an ideal speed for our boid, to tell it to either speed up or slow down whether it's going faster than this or not
+              float idealSpeed = dotProductOfTargets * 20 + 10;
+              
+              if (kinematic.getSpeed() < idealSpeed) {
+                kinematic.increaseSpeed(1,0);
+              } else if (kinematic.getSpeed() > idealSpeed) {
+                kinematic.increaseSpeed(-1,0);
+              }
+              
+              /*
               if (kinematic.getSpeed() < 40 && direction.mag() > 30) {
                 kinematic.increaseSpeed(1,0);
               } else if (kinematic.getSpeed() < 20 && direction.mag() > 15) {
@@ -124,6 +154,7 @@ class Boid
               } else {
                 kinematic.increaseSpeed(-1,0);
               }
+              */
               
             } else {
             
