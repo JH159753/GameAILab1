@@ -13,7 +13,7 @@ NavMesh nm = new NavMesh();
 
 boolean entering_path = false;
 
-boolean show_nav_mesh = false;
+boolean show_nav_mesh = true;
 
 boolean show_waypoints = false;
 
@@ -37,14 +37,41 @@ void mousePressed() {
   if (mouseButton == LEFT)
   {
      
-     if (waypoints.size() == 0)
+     if (!entering_path) //if you haven't made a path yet
      {
-        billy.seek(target);
+       //println("node size " + nm.nodes.size());
+        if (nm.nodes.size() > 0) //if you're on a map
+        {
+           println("Pathfinding to single target");
+           waypoints = nm.findPath(billy.kinematic.position, target);
+           println("waypoints " + waypoints);
+           //Collections.reverse(waypoints);
+           billy.follow(waypoints);
+        }
+        else { //if you're not on a map
+           println("Simply seeking target");
+           billy.seek(target);
+        }
      }
-     else
+     else //if you have a path
      {
-        waypoints.add(target);
+        //finish the path
+        if (nm.nodes.size() > 0) //if you're on a map
+        {
+          PVector start_vectoint = waypoints.get(waypoints.size() -1);
+          ArrayList<PVector> finalRoute = nm.findPath(start_vectoint, target);
+          for (PVector p: finalRoute)
+          {
+            waypoints.add(p);
+          }
+        }
+        else //if you're not on a map
+        {
+          waypoints.add(target);
+        }
+        println("Finishing Path");
         entering_path = false;
+        println(waypoints);
         billy.follow(waypoints);
      }
   }

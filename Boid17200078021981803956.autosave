@@ -1,6 +1,6 @@
 /// In this file, you will have to implement seek and waypoint-following
 /// The relevant locations are marked with "TODO"
-import java.util.*;
+
 class Crumb
 {
   PVector position;
@@ -35,17 +35,9 @@ class Boid
 
   void update(float dt)
   {
-    
-    if (waypoints != null) {
-      for (int i = 0; i<waypoints.size(); i++)
-      {
-        text(i, waypoints.get(i).x + 10, waypoints.get(i).y + 10);
-      }
-    }
     if (target != null)
     {
       // TODO: Implement seek here
-      
 
 
       //This makes a vector with the direction our boid needs to go to
@@ -68,9 +60,8 @@ class Boid
 
       //if the angle is larger than the threshold in the positive direction, rotate counterclockwise
       if (angleToTarget >= .1) {
-       //println("positive angle");
+        println("positive angle");
         kinematic.increaseSpeed(0.0, 2);
-
 
         //if the angle is smaller than the threshold in the negative direction, rotate clockwise
       } else if (angleToTarget < -.1) {
@@ -83,7 +74,6 @@ class Boid
           kinematic.increaseSpeed(0.0, -1);
         } else if (kinematic.getRotationalVelocity() < 0) {
           kinematic.increaseSpeed(0.0, 1);
-
         }
       }
 
@@ -114,7 +104,7 @@ class Boid
 
           kinematic.increaseSpeed(-kinematic.getSpeed(), 0);
         } else {
-          //println("else");
+          println("else");
           kinematic.increaseSpeed(-1, 0);
         }
       }
@@ -195,41 +185,14 @@ int count = 0;
   //}
   void follow(ArrayList<PVector> waypoints)
   {
-    if(waypoints.size() == 0) return;
-    println("vector " + waypoints);   
-    println("reverse vector " + waypoints);
-    int count = 0;
-    PVector stop = waypoints.get(0);
-    this.seek(stop);
-    
-    
-    
-    
-    PVector temp = waypoints.remove(0);
-    println("temp vector " + waypoints);
-    //follow(waypoints);
-   
-    //this.target = waypoints.get(0);
-     //do{
-       
-       
-     // println("in while " + count);
-     ////this.target = waypoints.get(count);
-     //this.target = waypoints.get(count);
-     //if(PVector.sub(this.target,this.kinematic.position).mag() < 40){
-     //   count++;
-     //}
-    
-  
-     //}while(count < waypoints.size());
-    //count++;
-    //for(int i = 1; i < waypoints.size(); i++){
-    //    println("dist " + PVector.sub(this.target,this.kinematic.position).mag());
-    //    if(PVector.sub(this.target,this.kinematic.position).mag() < 40){
-    //    this.seek(waypoints.get(i));
-    //    this.target = waypoints.get(i);
-    //    }
-    
+    this.target = waypoints.get(0);
+      // println("distance " + PVector.sub(this.target,this.kinematic.position).mag());
+    for (int i = 1; i < waypoints.size(); i++){
+      println("distance " + PVector.sub(this.target,this.kinematic.position).mag());
+      if(PVector.sub(this.target,this.kinematic.position).mag() < 4)
+       this.target = waypoints.get(i);
+        
     }
-
+    }
+  
 }
