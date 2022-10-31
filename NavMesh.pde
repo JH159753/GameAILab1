@@ -126,7 +126,7 @@ class NavMesh
     //}
     for (Node a: nodes)
     {      
-      //this is terrible for efficiency i'm so sorry
+      
       for (Node b: nodes)
       {
          if (b.equals(a)) continue;
@@ -167,12 +167,11 @@ class NavMesh
       
       int next_index = i+1;
       if (next_index > node_verts.size()-1) next_index = 0;
-      polygon_1.add( new Wall(node_verts.get(i), node_verts.get(next_index)) );
+      polygon_1.add(new Wall(node_verts.get(i), node_verts.get(next_index)));
     }
     
-    //for polygon_2
-    //a little bit tricker, since poly b has a disjunction between vertex indices
-    //the loop is thus different for constructing b
+
+    
     //start from index_2 and go further until you hit index A. You are guaranteed to finish the polygon once you connect A and B.
     int i = index_2;
     boolean completedpolygon_2 = false;
@@ -191,30 +190,22 @@ class NavMesh
     }
     
   
-    //we'll create a node to store poly a
+
     Node nodeA = new Node(recursionDepth+"A", polygon_1);
     setIndices(nodeA);
     nodes.add(nodeA);
     
-    //the same goes for b
+
     Node nodeB = new Node(recursionDepth+"B", polygon_2);
     setIndices(nodeB);    
     nodes.add(nodeB);
     
     
     
-    //this portion is not at all necessary for the program to function but it helps when debugging
+
     recursionDepth++;
     if (recursionDepth == maxDepth) return;
-    
-    //polygons are added to the node list, in order of A and B
-    //0.[NODE 0A] 
-    //1.[NODE 0B]
-    
-    //findReflexVertex will return -1 if the shape is all good
-    //remove the bad nodes from the list and add in two new ones
-    //order in the node list has no effect on neighboursing
-    //the node list functions identically to a bag in that regard
+   
     if (findReflexVertex(polygon_1) != -1) {
       nodes.remove(nodeA);
       convexDecomposition(nodeA);
@@ -229,18 +220,21 @@ class NavMesh
   int findReflexVertex(ArrayList<Wall> polygon)
   { 
 
-    for (int i = 0; i<polygon.size() - 1; i++)
+    for (int i = 0; i<polygon.size(); i++)
     {
      // finding the reflex angle by finding where it turns right
-      if (polygon.get(i).normal.dot(polygon.get(i + 1).direction) >= 0) {
-        return i + 1;
+     int j = i + 1;
+     // for index out of bounds
+     if( j >= polygon.size()) j = 0;
+      if (polygon.get(i).normal.dot(polygon.get(j).direction) >= 0) {
+        return j;
       }
     }
     
     return -1;
   }
   
-  //given a reflexive index, find a vertex that you can go to without intersection another wall 
+  
   int joiningVertex(ArrayList<Wall> polygon, int convex_index)
   {
     //you need the PVectors for this one
@@ -250,10 +244,9 @@ class NavMesh
       vertices.add(w.start);
     }
     
-    //our "bad" point
     PVector pointAtIndex = vertices.get(convex_index);
 
-    //we don't need to consider the vertex's neighbours since they obviously can't be connected to
+   
     int next_index = convex_index + 1;
     if (next_index >= vertices.size()) next_index = 0;
 
@@ -262,7 +255,7 @@ class NavMesh
 
     for (int potentialConnecting = vertices.size()-1; potentialConnecting>=0; potentialConnecting--)
     {
-      //skip neighbours and the bad point
+      
       if (potentialConnecting == next_index || potentialConnecting == convex_index || potentialConnecting == lastIndex) continue;
 
       PVector potentialConnectingPoint = vertices.get(potentialConnecting);
@@ -285,12 +278,12 @@ class NavMesh
     int joining_index = joiningVertex(node.polygon, convex_index);
     if (joining_index == -1) return;
     
-   // split polygons from small index to the max index
+   
     splitMap(node, min(convex_index, joining_index), max(convex_index, joining_index));
   }
 
   //creates a hashmap with key PVector and value Integer
-  //creating a hashmap for this removes the risk of directly comparing PVectors since it should look by reference instead of value
+ 
   void setVertexMap(Map map)
   {
     //clear all lookups and map vectors
@@ -379,10 +372,10 @@ class NavMesh
           frontier.add(new SearchFrontier(neighbours, first_frontier, node_dest.findCenter())); 
         }
       }
-      //first in frontier no longer required
+
       frontier.remove(0);
       //sort via lambda function
-      //shorter paths have priority
+      
       frontier.sort((a,b) -> {
         if (a.heuristicSum() > b.heuristicSum()) return 1;
         else if (a.heuristicSum() < b.heuristicSum()) return -1;
@@ -400,7 +393,7 @@ class NavMesh
   //given a list of frontiers, create a PVector path from the start to dest
   ArrayList<PVector> findDestPath(PVector dest, Node node_start, ArrayList<SearchFrontier> genPath)
   {
-    //we're going to build this list up from the end and then reverse it.
+    
     
     ArrayList<PVector> res = new ArrayList<PVector>();
     //add the end
