@@ -133,7 +133,7 @@ class Boid
               dotProductOfTargets = (dotProductOfTargets + 1) / 2;
               
               //use an ideal speed for our boid, to tell it to either speed up or slow down whether it's going faster than this or not
-              float idealSpeed = dotProductOfTargets * 20 + 10;
+              float idealSpeed = dotProductOfTargets * 80 + 10;
               
               if (kinematic.getSpeed() < idealSpeed) {
                 kinematic.increaseSpeed(1,0);
@@ -141,36 +141,35 @@ class Boid
                 kinematic.increaseSpeed(-1,0);
               }
               
-              /*
-              if (kinematic.getSpeed() < 40 && direction.mag() > 30) {
-                kinematic.increaseSpeed(1,0);
-              } else if (kinematic.getSpeed() < 20 && direction.mag() > 15) {
-                kinematic.increaseSpeed(.75,0);
-              } else if (kinematic.getSpeed() < 10 && direction.mag() > 5) {
-                kinematic.increaseSpeed(.5,0);
-              } else if (kinematic.getSpeed() < 5 && direction.mag() < 5) {
-                //This should ensure that the boid's speed can be dropped to exactly 0 so we don't have stuttering
-                kinematic.increaseSpeed(-kinematic.getSpeed(),0);
-              } else {
-                kinematic.increaseSpeed(-1,0);
-              }
-              */
               
             } else {
             
               //if no more targets to check, do the normal calculation
-              if (kinematic.getSpeed() < 40 && direction.mag() > 30) {
+              
+              //kinematic.getSpeed() is how fast we're moving, direction.mag() is how far are we from target
+              //Ideal speed here should be 80 at dist 85, and reduce linearly from there, hitting 0 at 5 units?
+              //This can be changed later if it isn't good
+              
+              float idealSpeed = (1 * direction.mag() - 5);
+              
+              //if idealSpeed is "negative" we should just set it to 0
+              if (idealSpeed < 0) {
+                idealSpeed = 0;
+              }
+              
+              //use this to know how off the target speed we are, and slow down accordingly
+              //This will be positive if the ideal speed is higher than current speed, negative if ideal speed is lower. 
+              float speedOffset = (idealSpeed - kinematic.getSpeed());
+              
+              if (abs(speedOffset) < 1) {
+                kinematic.increaseSpeed(speedOffset, 0);
+              } else if (idealSpeed < speedOffset) {
                 kinematic.increaseSpeed(1,0);
-              } else if (kinematic.getSpeed() < 20 && direction.mag() > 15) {
-                kinematic.increaseSpeed(.75,0);
-              } else if (kinematic.getSpeed() < 10 && direction.mag() > 5) {
-                kinematic.increaseSpeed(.5,0);
-              } else if (kinematic.getSpeed() < 5 && direction.mag() < 5) {
-                //This should ensure that the boid's speed can be dropped to exactly 0 so we don't have stuttering
-                kinematic.increaseSpeed(-kinematic.getSpeed(),0);
-              } else {
+              } else if (idealSpeed > speedOffset) {
                 kinematic.increaseSpeed(-1,0);
               }
+              
+              
             
             }
           
@@ -178,19 +177,33 @@ class Boid
           
             //if waypoints is null, do normal things
             println("waypoints is null");
+            
             //This code should trigger if there's only one target left
-            if (kinematic.getSpeed() < 40 && direction.mag() > 30) {
-              kinematic.increaseSpeed(1,0);
-            } else if (kinematic.getSpeed() < 20 && direction.mag() > 15) {
-              kinematic.increaseSpeed(.75,0);
-            } else if (kinematic.getSpeed() < 10 && direction.mag() > 5) {
-              kinematic.increaseSpeed(.5,0);
-            } else if (kinematic.getSpeed() < 5 && direction.mag() < 5) {
-              //This should ensure that the boid's speed can be dropped to exactly 0 so we don't have stuttering
-              kinematic.increaseSpeed(-kinematic.getSpeed(),0);
-            } else {
-              kinematic.increaseSpeed(-1,0);
-            }
+              
+              //kinematic.getSpeed() is how fast we're moving, direction.mag() is how far are we from target
+              //Ideal speed here should be 80 at dist 85, and reduce linearly from there, hitting 0 at 5 units?
+              //This can be changed later if it isn't good
+              
+              float idealSpeed = 1 * direction.mag() - 5;
+              
+              //if idealSpeed is "negative" we should just set it to 0
+              if (idealSpeed < 0) {
+                idealSpeed = 0;
+              }
+              
+              println(idealSpeed);
+              
+              //use this to know how off the target speed we are, and slow down accordingly
+              //This will be positive if the ideal speed is higher than current speed, negative if ideal speed is lower. 
+              float speedOffset = (idealSpeed - kinematic.getSpeed());
+              
+              if (abs(speedOffset) < 1) {
+                kinematic.increaseSpeed(speedOffset, 0);
+              } else if (idealSpeed < speedOffset) {
+                kinematic.increaseSpeed(1,0);
+              } else if (idealSpeed > speedOffset) {
+                kinematic.increaseSpeed(-1,0);
+              }
           
           }
           
