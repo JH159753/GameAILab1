@@ -58,12 +58,13 @@ class Wall
    
    void draw()
    {
-       strokeWeight(3);
+       
+       strokeWeight(1);
        line(start.x, start.y, end.x, end.y);
        if (SHOW_WALL_DIRECTION)
        {
           PVector marker = PVector.add(PVector.mult(start, 0.2), PVector.mult(end, 0.8));
-          circle(marker.x, marker.y, 5);
+          circle(marker.x, marker.y, 6);
        }
    }
 }

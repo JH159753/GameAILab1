@@ -1,5 +1,5 @@
 import java.util.*;
-
+Map origin_map;
 class Node
 {
   String id;
@@ -73,7 +73,7 @@ class SearchFrontier{
 class NavMesh
 {
   ArrayList<Node> nodes = new ArrayList<Node>();
-  int recursionDepth = 0;
+  int rec_stack_count = 0;
   int maxDepth = 1000;
   int pointAmount = 0;
   
@@ -156,55 +156,50 @@ class NavMesh
       node_verts.add(w.start);
     }
     
-    //for polygon_1, just make a polygon from index A to B
+    //make polygon from index 1 to 2.
     for(int i = index_1; i<=index_2; i++)
     {
       //finishes the polygon
       if (i == index_2) {
-        polygon_1.add( new Wall(node_verts.get(index_2), node_verts.get(index_1)) );
+        polygon_1.add(new Wall(node_verts.get(index_2), node_verts.get(index_1)));
         break;
       }
       
-      int next_index = i+1;
-      if (next_index > node_verts.size()-1) next_index = 0;
+      int next_index = i + 1;
+      if (next_index > node_verts.size() - 1) next_index = 0;
       polygon_1.add(new Wall(node_verts.get(i), node_verts.get(next_index)));
     }
     
 
     
-    //start from index_2 and go further until you hit index A. You are guaranteed to finish the polygon once you connect A and B.
     int i = index_2;
     boolean completedpolygon_2 = false;
     while (!completedpolygon_2) {
+      
       if (i == index_1) {
-        polygon_2.add( new Wall(node_verts.get(index_1), node_verts.get(index_2)) );
+        polygon_2.add(new Wall(node_verts.get(index_1), node_verts.get(index_2)));
         completedpolygon_2 = true;
         break;
       }
-      
-      int next_index = i+1;
-      if (next_index > node_verts.size()-1) next_index = 0;
-      polygon_2.add( new Wall(node_verts.get(i), node_verts.get(next_index)) );
+      int next_index = i + 1;
+      if (next_index > node_verts.size() - 1) next_index = 0;
+      polygon_2.add(new Wall(node_verts.get(i), node_verts.get(next_index)));
       
       i = next_index;
-    }
-    
-  
+    } 
 
-    Node nodeA = new Node(recursionDepth+"A", polygon_1);
+    Node nodeA = new Node(rec_stack_count+"A", polygon_1);
     setIndices(nodeA);
     nodes.add(nodeA);
     
 
-    Node nodeB = new Node(recursionDepth+"B", polygon_2);
+    Node nodeB = new Node(rec_stack_count+"B", polygon_2);
     setIndices(nodeB);    
     nodes.add(nodeB);
     
-    
-    
 
-    recursionDepth++;
-    if (recursionDepth == maxDepth) return;
+    rec_stack_count++;
+    if (rec_stack_count == maxDepth) return;
    
     if (findReflexVertex(polygon_1) != -1) {
       nodes.remove(nodeA);
@@ -301,10 +296,13 @@ class NavMesh
   void bake(Map map)
   {    
     //reset recursions and other values
-    recursionDepth = 0;
+    
+    // to keep track of recursive calls
+    rec_stack_count = 0;
     nodes.clear();
     pointAmount = map.walls.size();
     
+    origin_map = map;
     vert_lookup_map.clear();
     mapVectors.clear();
     
@@ -316,9 +314,7 @@ class NavMesh
     setIndices(m);
     
    
-    convexDecomposition(m);
-    
-   
+    convexDecomposition(m); 
     calculateAdjacencies();
        
     
@@ -431,9 +427,12 @@ class NavMesh
       {
          stroke(0,255,255);
          strokeWeight(3);
-          line(w.start.x, w.start.y, w.end.x, w.end.y);
+         line(w.start.x, w.start.y, w.end.x, w.end.y);
+         
           //w.draw();
       }
     }
+    
+    
   }
 }
