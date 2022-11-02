@@ -22,7 +22,7 @@ boolean show_help = false;
 boolean flocking_enabled = false;
 
 void setup() {
-  size(800, 600);
+  size(1000, 800);
   
   billy = new Boid(BILLY_START, BILLY_START_HEADING, BILLY_MAX_SPEED, BILLY_MAX_ROTATIONAL_SPEED, BILLY_MAX_ACCELERATION, BILLY_MAX_ROTATIONAL_ACCELERATION);
   randomSeed(0);

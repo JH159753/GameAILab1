@@ -109,8 +109,9 @@ class Boid
             //this checks if there's another target to go to
             if (currentTarget + 1 < waypoints.size()) {
               
+              
+              
               //if so, change the speed depending on the angle to the next target
-              //This part isn't really implemented at all, and I need sleep
               
               //We can calculate the angle to the next target with the use of two vectors: one from our location to current target, one from current target to next target
               //use the dot product of those two vectors; this gives us the angle between them, and we can use that to calculate how much we should slow down
@@ -133,7 +134,8 @@ class Boid
               dotProductOfTargets = (dotProductOfTargets + 1) / 2;
               
               //use an ideal speed for our boid, to tell it to either speed up or slow down whether it's going faster than this or not
-              float idealSpeed = dotProductOfTargets * 80 + 10;
+              //Square the dot product that's been normalized; it'll change the curve so it slows down more 
+              float idealSpeed = (dotProductOfTargets) * 80 + 5;
               
               if (kinematic.getSpeed() < idealSpeed) {
                 kinematic.increaseSpeed(1,0);
@@ -150,7 +152,7 @@ class Boid
               //Ideal speed here should be 80 at dist 85, and reduce linearly from there, hitting 0 at 5 units?
               //This can be changed later if it isn't good
               
-              float idealSpeed = (1 * direction.mag() - 5);
+              float idealSpeed = (1 * direction.mag() + 5);
               
               //if idealSpeed is "negative" we should just set it to 0
               if (idealSpeed < 0) {
