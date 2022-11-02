@@ -56,6 +56,8 @@ class Boid
         float angleToTarget = normalize_angle_left_right(atan2(direction.y, direction.x) - normalize_angle_left_right(kinematic.getHeading()));
         float arrivalThreshold = 60.0;
         
+        
+        
         //This just draws a circle for visual debugging purposes
         circle(target.x, target.y, 3);
         
@@ -63,18 +65,12 @@ class Boid
         //println(angleToTarget);
         
         //if the angle is larger than the threshold in the positive direction, rotate counterclockwise
-        if (angleToTarget > directionalThreshold && direction.mag() > 30) {
+        if (angleToTarget > directionalThreshold) {
           kinematic.increaseSpeed(0.0, +1);
           
-        } else if (angleToTarget > directionalThreshold && direction.mag() > 15) {
-          kinematic.increaseSpeed(0.0, +.5);
-          
         //if the angle is smaller than the threshold in the negative direction, rotate clockwise
-        } else if (angleToTarget < -directionalThreshold && direction.mag() > 30) {
+        } else if (angleToTarget < -directionalThreshold) {
           kinematic.increaseSpeed(0.0, -1);
-          
-        } else if (angleToTarget < -directionalThreshold && direction.mag() > 15) {
-          kinematic.increaseSpeed(0.0, -.5);
           
         //if the angle is within our threshold, stop our rotational velocity by rotating opposite
         } else if (directionalThreshold > angleToTarget) {
@@ -86,8 +82,6 @@ class Boid
             kinematic.increaseSpeed(0.0, kinematic.getRotationalVelocity()); 
           }
         }
-        
-        
         
         
         //if the target is outside its arrival threshold, accelerate. 
@@ -135,12 +129,20 @@ class Boid
               
               //use an ideal speed for our boid, to tell it to either speed up or slow down whether it's going faster than this or not
               //Square the dot product that's been normalized; it'll change the curve so it slows down more 
-              float idealSpeed = (dotProductOfTargets) * 80 + 5;
+              float idealSpeed = (dotProductOfTargets) * 80 + 10;
+              
+              //Also use an acceleration factor, dependent on the direction our boid is facing vs the direction it needs to go
+              //if angleToTarget is high, low acceleration. If it's low, high acceleration
+              //angleToTarget can be from neg pi to pi, so use its absolute value
+              
+              float acceleration = pow((PI - abs(angleToTarget)) / PI, 10);
+              
+              
               
               if (kinematic.getSpeed() < idealSpeed) {
-                kinematic.increaseSpeed(1,0);
+                kinematic.increaseSpeed(acceleration,0);
               } else if (kinematic.getSpeed() > idealSpeed) {
-                kinematic.increaseSpeed(-1,0);
+                kinematic.increaseSpeed(-acceleration,0);
               }
               
               
@@ -152,7 +154,7 @@ class Boid
               //Ideal speed here should be 80 at dist 85, and reduce linearly from there, hitting 0 at 5 units?
               //This can be changed later if it isn't good
               
-              float idealSpeed = (1 * direction.mag() + 5);
+              float idealSpeed = (1 * direction.mag() - 5);
               
               //if idealSpeed is "negative" we should just set it to 0
               if (idealSpeed < 0) {
