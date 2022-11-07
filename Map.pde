@@ -286,7 +286,7 @@ class Map
       }
    }
    
-   boolean isReachable(PVector point)
+   public boolean isReachable(PVector point)
    {
        if (!isPointInPolygon(point, outline)) return false;
        for (Obstacle o: obstacles)
@@ -295,29 +295,5 @@ class Map
        }
        return true;
    }
-   PVector percentFromPoint(PVector from, PVector to, float percent)
-   {
-     //p1 + ((p2 - p1) * percent)
-     return PVector.add(from, PVector.mult(PVector.sub(to, from),percent));
-   }
    
-   boolean intersectsWall(PVector from, PVector to)
-   {  
-      //5% of the way from the start
-      PVector start = percentFromPoint(from, to, 0.01);
-      
-      //95% of the way from the start
-      PVector end = percentFromPoint(from, to, 0.99);
-      
-      if (!isReachable(start)) return true;
-     
-      //println("Start: " + start);
-      //println("End: " + end);
-     
-      for (Wall w : walls)
-      {
-         if (w.crosses(start, end)) return true;
-      }
-      return false;
-   }
 }

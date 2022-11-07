@@ -37,26 +37,26 @@ void mousePressed() {
   if (mouseButton == LEFT)
   {
      
-     if (!entering_path) //if you haven't made a path yet
+     if (!entering_path) 
      {
-       //println("node size " + nm.nodes.size());
-        if (nm.nodes.size() > 0) //if you're on a map
+       
+        if (nm.nodes.size() > 0) // if map is pressed and nodes are still left
         {
-           println("Pathfinding to single target");
+          
            waypoints = nm.findPath(billy.kinematic.position, target);
-           println("waypoints " + waypoints);
-           //Collections.reverse(waypoints);
+         
+      
            billy.follow(waypoints);
         }
-        else { //if you're not on a map
-           println("Simply seeking target");
+        else { //target seeking on plain space
+           
            billy.seek(target);
         }
      }
-     else //if you have a path
+     else 
      {
         //finish the path
-        if (nm.nodes.size() > 0) //if you're on a map
+        if (nm.nodes.size() > 0) //remaining map if left
         {
           PVector start_vectoint = waypoints.get(waypoints.size() -1);
           ArrayList<PVector> finalRoute = nm.findPath(start_vectoint, target);
@@ -65,13 +65,13 @@ void mousePressed() {
             waypoints.add(p);
           }
         }
-        else //if you're not on a map
+        else //waypoints to be added
         {
           waypoints.add(target);
         }
-        println("Finishing Path");
+        
         entering_path = false;
-        println(waypoints);
+       
         billy.follow(waypoints);
      }
   }

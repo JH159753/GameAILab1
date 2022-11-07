@@ -25,8 +25,8 @@ class Node
       x_avg += w.start.x;
       y_avg += w.start.y;
     }
-    x_avg /=polygon.size();
-    y_avg /=polygon.size();
+    x_avg /= polygon.size();
+    y_avg /= polygon.size();
     return new PVector(x_avg, y_avg);
   }
   
@@ -35,7 +35,7 @@ class Node
      int prev = indices.get(indices.size()-1);
      for(Integer i: indices)
      {
-       if (n.indices.contains(prev) && n.indices.contains(i)) return true;
+       if (n.indices.contains(i) && n.indices.contains(prev)) return true;
        prev = i;
      }
      
@@ -74,11 +74,11 @@ class NavMesh
 {
   ArrayList<Node> nodes = new ArrayList<Node>();
   int rec_stack_count = 0;
-  int maxDepth = 1000;
-  int pointAmount = 0;
+  int max_depth = 1000;
+  
   
   HashMap<PVector, Integer> vert_lookup_map = new HashMap<PVector, Integer>();
-  ArrayList<PVector> mapVectors = new ArrayList<PVector>();
+  ArrayList<PVector> map_vecs = new ArrayList<PVector>();
   
   PVector midpoint(Node a, Node b)
   {
@@ -88,19 +88,19 @@ class NavMesh
      int prev_index = a.indices.get(a.indices.size()-1);
      for(Integer i: a.indices)
      {
-       if (b.indices.contains(prev_index) && b.indices.contains(i)) {
+       if (b.indices.contains(i) && b.indices.contains(prev_index)) {
          start = prev_index;
          end = i;
          break;
        }
        prev_index = i;
      }
-     println(a.id + " and " + b.id + " share indices " + start + " and " + end);
+
      
      
      PVector start_vect, end_vect;
-     start_vect = mapVectors.get(start);
-     end_vect = mapVectors.get(end);
+     start_vect = map_vecs.get(start);
+     end_vect = map_vecs.get(end);
      
      return new PVector(start_vect.x + (end_vect.x - start_vect.x)/2,
      start_vect.y + (end_vect.y - start_vect.y)/2);
@@ -134,7 +134,7 @@ class NavMesh
       }
     }
   }
-  void setIndices(Node node)
+  void setNodeIndices(Node node)
   {
      for(Wall w: node.polygon)
      {
@@ -142,7 +142,7 @@ class NavMesh
      }
   }
 
-  //assume index_1 < index_2
+
   void splitMap(Node node, int index_1, int index_2)
   {
     
@@ -189,17 +189,17 @@ class NavMesh
     } 
 
     Node nodeA = new Node(rec_stack_count+"A", polygon_1);
-    setIndices(nodeA);
+    setNodeIndices(nodeA);
     nodes.add(nodeA);
     
 
     Node nodeB = new Node(rec_stack_count+"B", polygon_2);
-    setIndices(nodeB);    
+    setNodeIndices(nodeB);    
     nodes.add(nodeB);
     
 
     rec_stack_count++;
-    if (rec_stack_count == maxDepth) return;
+    if (rec_stack_count == max_depth) return;
    
     if (findReflexVertex(polygon_1) != -1) {
       nodes.remove(nodeA);
@@ -228,7 +228,32 @@ class NavMesh
     
     return -1;
   }
-  
+  PVector percentFromPoint(PVector from, PVector to, float percent)
+   {
+     //p1 + ((p2 - p1) * percent)
+     return PVector.add(from, PVector.mult(PVector.sub(to, from),percent));
+   }
+   
+   boolean intersectsWall(PVector from, PVector to)
+   {  
+      //threshold to see if wall intersects with 1% margin.
+      
+      PVector start = percentFromPoint(from, to, 0.01);
+      
+      //95% of the way from the start
+      PVector end = percentFromPoint(from, to, 0.99);
+      
+      if (!map.isReachable(start)) return true;
+     
+      //println("Start: " + start);
+      //println("End: " + end);
+     
+      for (Wall w : map.walls)
+      {
+         if (w.crosses(start, end)) return true;
+      }
+      return false;
+   }
   
   int joiningVertex(ArrayList<Wall> polygon, int convex_index)
   {
@@ -248,16 +273,16 @@ class NavMesh
     int lastIndex = convex_index - 1;
     if (lastIndex < 0) lastIndex = vertices.size() - 1;
 
-    for (int potentialConnecting = vertices.size()-1; potentialConnecting>=0; potentialConnecting--)
+    for (int conn_point = vertices.size()-1; conn_point>=0; conn_point--)
     {
       
-      if (potentialConnecting == next_index || potentialConnecting == convex_index || potentialConnecting == lastIndex) continue;
+      if (conn_point == next_index || conn_point == convex_index || conn_point == lastIndex) continue;
 
-      PVector potentialConnectingPoint = vertices.get(potentialConnecting);
+      PVector conn_pointPoint = vertices.get(conn_point);
       
-      if (!map.intersectsWall(pointAtIndex, potentialConnectingPoint))
+      if (!intersectsWall(pointAtIndex, conn_pointPoint))
       {
-        return potentialConnecting;
+        return conn_point;
       }
     }
     
@@ -282,13 +307,13 @@ class NavMesh
   void setVertexMap(Map map)
   {
     //clear all lookups and map vectors
-    mapVectors.clear();
+    map_vecs.clear();
     vert_lookup_map.clear();
     
     for (int i = 0; i < map.walls.size(); i++)
     {
       vert_lookup_map.put(map.walls.get(i).start, i);
-      mapVectors.add(map.walls.get(i).start);
+      map_vecs.add(map.walls.get(i).start);
      
     }
   }
@@ -300,18 +325,18 @@ class NavMesh
     // to keep track of recursive calls
     rec_stack_count = 0;
     nodes.clear();
-    pointAmount = map.walls.size();
+    
     
     origin_map = map;
     vert_lookup_map.clear();
-    mapVectors.clear();
+    map_vecs.clear();
     
     //make hashmap of vertices
     setVertexMap(map);
     
     //create a node with the whole map walls
     Node m = new Node("Map", map.outline);
-    setIndices(m);
+    setNodeIndices(m);
     
    
     convexDecomposition(m); 
@@ -333,26 +358,19 @@ class NavMesh
   //Uses A* to find a path from start to dest
   ArrayList<PVector> findPath(PVector start, PVector dest)
   {
-    println("dest vec " + dest);
+   
     ArrayList<SearchFrontier> frontier = new ArrayList<SearchFrontier>(); 
     ArrayList<Node> visited_nodes = new ArrayList<Node>(); 
     Node node_start = nodeFromPoint(start);
     Node node_dest = nodeFromPoint(dest);
-    println("dest node " + node_dest);
-    //for (Node n: nodes)
-    //{
-    //  if (isPointInPolygon(start,n.polygon)) node_start = n;
-    //  else if (isPointInPolygon(dest,n.polygon)) node_dest = n;
-    //  //else println("node_dest is null");
-        
-    //}
-   
+    
+    
     
     SearchFrontier s = new SearchFrontier(node_start, null, node_dest.findCenter());
     frontier.add(s);
     visited_nodes.add(frontier.get(0).node);
     
-    println("frontier " + frontier);
+   
     //till the end of of frontier
     while (frontier.get(0).node != node_dest)
     {
@@ -362,7 +380,7 @@ class NavMesh
       
       for (Node neighbours: first_frontier.node.neighbours)
       {
-        println("loop");
+        
         if (!visited_nodes.contains(neighbours))
         {
           frontier.add(new SearchFrontier(neighbours, first_frontier, node_dest.findCenter())); 
@@ -405,7 +423,7 @@ class NavMesh
     
     
     Collections.reverse(res);
-    println("result " + res);
+    
     return res;
   }
 
@@ -425,14 +443,21 @@ class NavMesh
     {
       for (Wall w: n.polygon)
       {
-         stroke(0,255,255);
-         strokeWeight(3);
+         stroke(255);
+         strokeWeight(1);
          line(w.start.x, w.start.y, w.end.x, w.end.y);
          
           //w.draw();
       }
     }
+    for( Wall w: map.outline){
+        stroke(255,0,0);
+         strokeWeight(3);
+         line(w.start.x, w.start.y, w.end.x, w.end.y);
     
+    
+    
+    }
     
   }
 }
