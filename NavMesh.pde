@@ -228,20 +228,20 @@ class NavMesh
     
     return -1;
   }
-  PVector percentFromPoint(PVector from, PVector to, float percent)
+  PVector percentage(PVector from, PVector to, float percent)
    {
      //p1 + ((p2 - p1) * percent)
-     return PVector.add(from, PVector.mult(PVector.sub(to, from),percent));
+      return PVector.mult(PVector.sub(to, from),percent);
    }
    
    boolean intersectsWall(PVector from, PVector to)
    {  
       //threshold to see if wall intersects with 1% margin.
       
-      PVector start = percentFromPoint(from, to, 0.01);
+      PVector start = PVector.add(from, percentage(from, to, 0.01));
       
-      //95% of the way from the start
-      PVector end = percentFromPoint(from, to, 0.99);
+      
+      PVector end = PVector.add(from, percentage(from, to, 0.99));
       
       if (!map.isReachable(start)) return true;
      
@@ -264,7 +264,11 @@ class NavMesh
       vertices.add(w.start);
     }
     
-    PVector pointAtIndex = vertices.get(convex_index);
+
+
+
+
+
 
    
     int next_index = convex_index + 1;
@@ -444,7 +448,7 @@ class NavMesh
       for (Wall w: n.polygon)
       {
          stroke(255);
-         strokeWeight(1);
+         strokeWeight(2);
          line(w.start.x, w.start.y, w.end.x, w.end.y);
          
           //w.draw();
