@@ -265,28 +265,25 @@ class NavMesh
     }
     
 
-
-
-
-
+    PVector index_point = vertices.get(convex_index);
 
    
     int next_index = convex_index + 1;
     if (next_index >= vertices.size()) next_index = 0;
 
-    int lastIndex = convex_index - 1;
-    if (lastIndex < 0) lastIndex = vertices.size() - 1;
+    int last_index = convex_index - 1;
+    if (last_index < 0) last_index = vertices.size() - 1;
 
-    for (int conn_point = vertices.size()-1; conn_point>=0; conn_point--)
+    for (int i = vertices.size()-1; i>=0; i--)
     {
       
-      if (conn_point == next_index || conn_point == convex_index || conn_point == lastIndex) continue;
+      if (i == next_index || i == convex_index || i == last_index) continue;
 
-      PVector conn_pointPoint = vertices.get(conn_point);
+      PVector point_vertex = vertices.get(i);
       
-      if (!intersectsWall(pointAtIndex, conn_pointPoint))
+      if (!intersectsWall(index_point, point_vertex))
       {
-        return conn_point;
+        return i;
       }
     }
     
